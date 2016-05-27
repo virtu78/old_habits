@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Dungeon</title>
+<meta charset="UTF-8">
+<script src="map.js"></script>
+<script src="object.js"></script>
+</head>
+<body>
+<canvas id="canvasid" width="960" height="960" style="border:1px solid black;">
+</canvas>
+<script type='text/javascript'>
+window.onload = function() {
+var canvas = document.getElementById("canvasid");
+var ctx = canvas.getContext("2d");
+//console.log(canvas);
+LoadMap();
+mapManager.draw(ctx);
+LoadAtlas();
+spriteManager.drawSprite(ctx);
+ };
+</script>
+
+</body>
+</html>
