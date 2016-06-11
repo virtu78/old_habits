@@ -12,18 +12,6 @@ var mapManager =
 	jsonLoaded:false,//json описание загружено(сначала-false)
 	view:{x:0, y:0, w:800, h:600}
 }
-function log(){
-try{console.log.apply(console, arguments);
-}
-catch(e){
-try{
-opera.postError.apply(opera, arguments);
-}
-catch(e){
-alert(Array.prototype.join.call(arguments, " "));
-}
-}
-}
 function LoadMap(){
 	
 		var request = new XMLHttpRequest();//создание ajax запроса
