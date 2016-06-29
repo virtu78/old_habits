@@ -10,7 +10,7 @@ var mapManager =
 	imgLoadCount:0, // количество загруженных изображений
 	imgLoaded:false,//все изображения загружены (сначала-false)
 	jsonLoaded:false,//json описание загружено(сначала-false)
-	view:{x:0, y:0, w:800, h:600}
+	view:{x:0, y:0, w:960, h:960}
 }
 function LoadMap(){
 	
@@ -93,14 +93,17 @@ if(!mapManager.imgLoaded || !mapManager.jsonLoaded){
 				if(mapManager.mapData.layers[j].type === "objectgroup")
 				{
 						var entities = mapManager.mapData.layers[j];
+						
 						//разобрать слой с объектами
-						for(var i=0; i<entities.object.length; i++)
+						for(var i=0; i<entities.objects.length; i++)
 						{
 							var e = entities.objects[i];
+							console.log(e);
 								try
 							{
 								var obj = Object.create(gameManager.factory[e.type]);
 								//  в соответсвии с типом создаем экземпляр объекта
+								console.log(gameManager);
 								obj.name = e.name;
 								obj.pos_x = e.x;
 								obj.pos_y = e.y;
@@ -108,15 +111,20 @@ if(!mapManager.imgLoaded || !mapManager.jsonLoaded){
 								obj.size_y = e.height;
 								//помещаем в массив объектов
 								gameManager.entities.push(obj);
+								
 								if(obj.name === "player")
 								//инициализируем параметры игрока
 								gameManager.initPlayer(obj);
+								
 							}	catch(ex){
-								console.log("Произошла ощибка во время создания: ["+e.gid+"]" +e.type+","+ex);
+								console.log("Error while creating: ["+e.gid+"]" +e.type+","+ex);
 								//сообщение об ошибке
+								
 						}
 				}// конец  for  для объектов слоя objectgroup
+				
 }// конец  if  проверки типа слоя на равенство objectgroup
+
 };
 mapManager.draw = function(ctx)
 	{ 	//нарисовать карту в контексте
@@ -151,7 +159,10 @@ mapManager.draw = function(ctx)
 						//	continue;
 						// сдвигаем видимую зону
 						
-						
+						if(!mapManager.isVisible(pX,pY,mapManager.tSize.x,mapManager.tSize.y))
+							continue;
+						pX=pX-mapManager.view.x;
+						pY=pY-mapManager.view.y;
 						ctx.drawImage(tile.img, tile.px, tile.py, mapManager.tSize.x,
 						mapManager.tSize.y, pX, pY, mapManager.tSize.x, mapManager.tSize.y);
 					}
@@ -160,8 +171,8 @@ mapManager.draw = function(ctx)
 				
 		}//окончание if else
 				
-
-				
+	
+			
 	};
 	
 
@@ -204,4 +215,149 @@ mapManager.getTileset = function (tileIndex)
 	}
 	return null;// возвращается найденный  tileset
 };
+mapManager.isVisible =function(x,y,width,height){// не рисуем за пределами видимой зоны
+if(x+width<mapManager.view.x||y+height<mapManager.view.y||
+x>mapManager.view.x+mapManager.view.w||y>mapManager.view.y+mapManager.view.h)
+return false;
+return true;
+};
 
+var spriteManager = 
+{
+	atlas:null,
+	image: new Image(),
+	sprites:new Array(),//массив объектов для отображения
+	imgLoaded:false,
+	jsonLoaded:false
+};
+
+function LoadAtlas()
+{
+	var request = new XMLHttpRequest();//создание ajax запроса
+		request.open("GET", "scaven.json", true);
+		//request.overrideMimeType('text/plain; charset=x-user-defined');
+		request.onreadystatechange = function(){
+			if(request.readyState == 4 ){
+				if(request.status == 200){
+				
+					
+	   spriteManager.parseAtlas(request.responseText);
+	   spriteManager.loadImg();
+	   
+				}
+			}
+		};
+		//true -  отправить асинхронный запрс на path
+		//  с использованием функции GET
+		request.send();//отпраить запрос
+};
+
+spriteManager.parseAtlas=function(atlasJSON)
+{
+	//разобрать атлас с объектами
+	spriteManager.atlas =JSON.parse(atlasJSON)
+	
+	for (var name in spriteManager.atlas.frames)
+	{//проход по всем именам в frames
+		var frame = spriteManager.atlas.frames[name].frame;// получение спрайта и
+		//сохранение в  frame
+	// сохранение характеристик  frame в виде объекта
+	spriteManager.sprites.push({name: name, x: frame.x, y: frame.y, w:frame.w, h:frame.h});
+	spriteManager.jsonLoaded=true;
+	console.log(spriteManager.jsonLoaded);
+	}
+};
+console.log(spriteManager.sprites);
+
+
+spriteManager.loadImg =function(){
+	for(var image in spriteManager.atlas.meta)
+	{
+		var img = new Image();
+		img.onload = function()
+		{
+			spriteManager.imgLoaded=true;
+			console.log(spriteManager.imgLoaded);			
+		};
+		img.src = spriteManager.atlas.meta.image;
+		spriteManager.image=img;
+	}
+	
+console.log(spriteManager.image);
+	
+};
+console.log(spriteManager);
+	
+
+spriteManager.drawSprite = function(ctx,name,x,y){
+	if(!spriteManager.imgLoaded || !spriteManager.jsonLoaded){
+			setTimeout(function(){spriteManager.drawSprite(ctx,name,x,y);},100);
+			}else{
+				var sprite = spriteManager.getSprite();
+				if(!mapManager.isVisible(x,y,sprite.w, sprite.h))
+					return;//не рисуем за пределами видимой зоны
+				//сдвигаем видимую зону
+				x-=mapManager.view.x;
+				y-=mapManager.view.y;
+				console.log(spriteManager.imgLoaded);
+				console.log(spriteManager.jsonLoaded);
+				ctx.drawImage(spriteManager.image,sprite.x,sprite.y,sprite.w,sprite.h,x,y.sprite.w,sprite.h);
+}
+
+};
+
+	spriteManager.getSprite=function()
+	{//получить объект по имени
+		for (var i=0;i<spriteManager.sprites.length;i++)
+		{
+			var s=spriteManager.sprites[i];
+			if (s.name === name)//имя совпало - вернуть объект
+			return s;
+			console.log(s);
+		}
+	return null;//если не нашли
+	
+	};
+	mapManager.drawScaven=function(ctx){
+		spriteManager.drawSprite(ctx,'left_right',pos_x,pos_y)
+	}
+	/*var Entity = 
+{
+	pos_x:0,pos_y:0,//позиция объекта
+	size_x:0, size_y:0,//размеры объекта
+	extend:function(extendProto)
+	{
+		var object = Object.create(Entity)
+		for(var property in ExtendProto)
+		{
+			if(Entity.hasOwnProperty(property) || typeof object[property]==="undefined")
+			{
+				object[property] = extendProto[property];
+			}
+		}//конец цикла  for
+	
+	}//конец функции extend
+};
+var Player = Entity.extend({
+	lifetime:100,
+	move_x:0,move_y:0,//направление движения
+	speed:1,// скорость игрока
+	draw: function(ctx){},//прорисовка игрока
+	update: function(){},//обновление в цикле
+	onTouchEntity:function(obj){},//обработка встречи с препятствием
+	onTouchMap:function(idx){},//обработка встречи с лавой
+	kill:function(){},//уничтожение объекта
+	attack: function(){}//атака
+});
+var Enemy = Entity.extend({
+	lifetime:100,
+	move_x:0,move_y:0,//направление движения
+	speed:1,// скорость игрока
+	draw: function(ctx){spriteManager.draw.Sprite(ctx, "left_stand", spriteManager.pos_x, spriteManager.pos_y);},//прорисовка игрока
+	update: function(){},//обновление в цикле
+	onTouchEntity:function(obj){},//обработка встречи с препятствием
+	onTouchMap:function(idx){},//обработка встречи с лавой
+	kill:function(){},//уничтожение объекта
+	attack: function(){}//атака
+});
+*/
