@@ -278,7 +278,6 @@ console.log(spriteManager.image);
 };
 console.log(spriteManager);
 	
-
 spriteManager.drawSprite = function(ctx,name,x, y){
 	if(!spriteManager.imgLoaded || !spriteManager.jsonLoaded){
 			setTimeout(function(){spriteManager.drawSprite(ctx, name, x, y);},100);
