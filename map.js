@@ -1,5 +1,4 @@
-var mapManager = 
-{
+var mapManager = {
 	mapData:null, //переменная для хранения карты
 	tLayer:null, //переменная для хранения ссылки на блоки карты
 	xCount:0, // количество блоков по горизонтали
@@ -33,11 +32,7 @@ function LoadMap(){
 //var something = loadMap();
 //loadMap();
 
-
-	
-
-mapManager.parseMapJSON = function(mapJSON)
-	{
+mapManager.parseMapJSON = function(mapJSON){
 		mapManager.mapData = JSON.parse(mapJSON);//разобрать JSON
 		mapManager.xCount = mapManager.mapData.width;// сохранение ширины
 		mapManager.yCount = mapManager.mapData.height;//сохранение высоты
@@ -64,8 +59,7 @@ mapManager.parseMapJSON = function(mapJSON)
 			
 	        //забираем tileset 
 	        var t = mapManager.mapData.tilesets[i];//
-	       var ts = 
-	        {// создаем свой объект tileset
+	       var ts = {// создаем свой объект tileset
 	
 	            firstgid: t.firstgid, // firstgid - с него начинается нумерация в data
 	             image: img, // объект рисунка
@@ -82,8 +76,7 @@ mapManager.parseMapJSON = function(mapJSON)
 	
 	}
 	
-mapManager.parseEntities=function()
-{
+/*mapManager.parseEntities=function(){
 	//разбор слоя типа objectgroup
 if(!mapManager.imgLoaded || !mapManager.jsonLoaded){
 			setTimeout(function(){mapManager.parseEntities();},100);
@@ -126,8 +119,8 @@ if(!mapManager.imgLoaded || !mapManager.jsonLoaded){
 }// конец  if  проверки типа слоя на равенство objectgroup
 
 };
-mapManager.draw = function(ctx)
-	{ 	//нарисовать карту в контексте
+*/
+mapManager.draw = function(ctx){ 	//нарисовать карту в контексте
 		//если карта не загружена, то повторить прорисовку через 100 мсек
 		if(!mapManager.imgLoaded || !mapManager.jsonLoaded)
 		{
@@ -171,14 +164,13 @@ mapManager.draw = function(ctx)
 				
 		}//окончание if else
 				
-	
+	spriteManager.drawSprite(ctx,'left_right', Scaven.pos_x, Scaven.pos_y)
 			
 	};
 	
 
 
-mapManager.getTile = function (tileIndex)
-	{// индекс блока
+mapManager.getTile = function (tileIndex){// индекс блока
 		var tile = 
 		{//один блока
 			img:null,//изображение tileset
@@ -197,13 +189,11 @@ mapManager.getTile = function (tileIndex)
 		tile.px = x * mapManager.tSize.x;
 		tile.py =y * mapManager.tSize.y;
 		
-		return tile;// возвращаем блок для отображения
-		
+		return tile;// возвращаем блок для отображения		
 	};
 	
 	
-mapManager.getTileset = function (tileIndex)
-{// получение блока по индексу
+mapManager.getTileset = function (tileIndex){// получение блока по индексу
 	for(var i=mapManager.tilesets.length - 1; i >= 0; i--)
 		//в каждом  tilesets[i].firstgid  записано число, 
 		//с которого начинается нумерация блоков
@@ -221,9 +211,11 @@ x>mapManager.view.x+mapManager.view.w||y>mapManager.view.y+mapManager.view.h)
 return false;
 return true;
 };
-
-var spriteManager = 
-{
+	var Scaven = {
+	pos_x:480, pos_y:480,//позиция объекта врага
+	
+}
+var spriteManager = {
 	atlas:null,
 	image: new Image(),
 	sprites:new Array(),//массив объектов для отображения
@@ -231,8 +223,7 @@ var spriteManager =
 	jsonLoaded:false
 };
 
-function LoadAtlas()
-{
+function LoadAtlas(){
 	var request = new XMLHttpRequest();//создание ajax запроса
 		request.open("GET", "scaven.json", true);
 		//request.overrideMimeType('text/plain; charset=x-user-defined');
@@ -252,8 +243,7 @@ function LoadAtlas()
 		request.send();//отпраить запрос
 };
 
-spriteManager.parseAtlas=function(atlasJSON)
-{
+spriteManager.parseAtlas=function(atlasJSON){
 	//разобрать атлас с объектами
 	spriteManager.atlas =JSON.parse(atlasJSON)
 	
@@ -289,43 +279,38 @@ console.log(spriteManager.image);
 console.log(spriteManager);
 	
 
-spriteManager.drawSprite = function(ctx,name,x,y){
+spriteManager.drawSprite = function(ctx,name,x, y){
 	if(!spriteManager.imgLoaded || !spriteManager.jsonLoaded){
-			setTimeout(function(){spriteManager.drawSprite(ctx,name,x,y);},100);
+			setTimeout(function(){spriteManager.drawSprite(ctx, name, x, y);},100);
 			}else{
-				var sprite = spriteManager.getSprite();
+				var sprite = spriteManager.getSprite('left_right');
 				if(!mapManager.isVisible(x,y,sprite.w, sprite.h))
 					return;//не рисуем за пределами видимой зоны
 				//сдвигаем видимую зону
 				x-=mapManager.view.x;
 				y-=mapManager.view.y;
-				console.log(spriteManager.imgLoaded);
-				console.log(spriteManager.jsonLoaded);
-				ctx.drawImage(spriteManager.image,sprite.x,sprite.y,sprite.w,sprite.h,x,y.sprite.w,sprite.h);
+				//console.log(spriteManager.imgLoaded);
+				//console.log(spriteManager.jsonLoaded);
+				//console.log(sprite);
+				ctx.drawImage(spriteManager.image, sprite.x, sprite.y, sprite.w, sprite.h, x, y, sprite.w, sprite.h);
 }
 
 };
 
-	spriteManager.getSprite=function()
-	{//получить объект по имени
+	spriteManager.getSprite=function(name){//получить объект по имени
 		for (var i=0;i<spriteManager.sprites.length;i++)
 		{
 			var s=spriteManager.sprites[i];
 			if (s.name === name)//имя совпало - вернуть объект
 			return s;
-			console.log(s);
+			//console.log(s);
 		}
 	return null;//если не нашли
 	
 	};
-	mapManager.drawScaven=function(ctx){
-		spriteManager.drawSprite(ctx,'left_right',pos_x,pos_y)
-	}
-	/*var Entity = 
-{
-	pos_x:0,pos_y:0,//позиция объекта
-	size_x:0, size_y:0,//размеры объекта
-	extend:function(extendProto)
+	
+
+	/*extend:function(extendProto)
 	{
 		var object = Object.create(Entity)
 		for(var property in ExtendProto)
@@ -360,4 +345,35 @@ var Enemy = Entity.extend({
 	kill:function(){},//уничтожение объекта
 	attack: function(){}//атака
 });
-*/
+
+
+
+
+sail
+
+
+
+And the dolphin belly cut open screw !
+ Shot in the back does not expect one .
+ The battery is not present already shells .
+ It is necessary to bend faster !
+
+ Sail ! Torn sail !
+ I confess ! I confess ! I confess !
+
+ Even on patrol can not meet the enemy .
+ It is not the mountain - if a sore leg .
+ Door hinges creak many , many sing :
+ Who are you? You are not welcome !
+
+ Sail ! Torn sail !
+ I confess ! I confess ! I confess !
+
+ Many of the summer - everyone who sings in his sleep !
+ All of the light may lie at the bottom,
+ All continents are lit on fire -
+ But all this - not for me !
+
+ But sail ! Torn sail !
+ I confess ! I confess ! I confess !
+ */
