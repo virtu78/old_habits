@@ -345,34 +345,4 @@ var Enemy = Entity.extend({
 	attack: function(){}//атака
 });
 
-
-
-
-sail
-
-
-
-And the dolphin belly cut open screw !
- Shot in the back does not expect one .
- The battery is not present already shells .
- It is necessary to bend faster !
-
- Sail ! Torn sail !
- I confess ! I confess ! I confess !
-
- Even on patrol can not meet the enemy .
- It is not the mountain - if a sore leg .
- Door hinges creak many , many sing :
- Who are you? You are not welcome !
-
- Sail ! Torn sail !
- I confess ! I confess ! I confess !
-
- Many of the summer - everyone who sings in his sleep !
- All of the light may lie at the bottom,
- All continents are lit on fire -
- But all this - not for me !
-
- But sail ! Torn sail !
- I confess ! I confess ! I confess !
- */
+*/
